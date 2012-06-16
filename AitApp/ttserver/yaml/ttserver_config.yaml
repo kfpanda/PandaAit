@@ -1,0 +1,45 @@
+context_param : 
+    ttserver_ip : 127.0.0.1
+    ttserver_port : 11211
+    memcache_ip : 127.0.0.1
+    memcache_port : 13111
+
+ttserver_third_lib : 
+    tokyocabinet : 
+        name : tokyocabinet
+        order : 60
+        after_cmd :
+            cmd : [
+                './configure ',
+                'make ',
+                'make install'
+            ]
+    tokyotyrant : 
+        name : tokyotyrant
+        order : 70
+        after_cmd :
+            cmd : [
+                './configure ',
+                'make ',
+                'make install'
+            ]
+
+server_test : 
+    ttserver : 
+        - command : 
+            cmd : curl -X PUT http://${ttserver_ip}:${ttserver_port}/key -d value
+            success : 
+        - command : 
+            cmd : curl http://${ttserver_ip}:${ttserver_port}/key
+            success : value
+    
+server_config : 
+    ttserver : 
+        before_cmd : 
+            cmd : 
+                - ulimit -SHn 51200
+                - pkill -9 ttserver
+                - mkdir /ttserver
+                - rm -f /ttserver/ttserver.pid
+            sleep : 1
+        command : ttserver -host ${ttserver_ip} -port ${ttserver_port} -thnum 8 -dmn -pid /ttserver/ttserver.pid -log /ttserver/ttserver.log -le -ulog /ttserver/ -ulim 128m -sid 1 -rts /ttserver/ttserver.rts /ttserver/database.tcb#lmemb=1024#nmemb=2048#bnum=10000000

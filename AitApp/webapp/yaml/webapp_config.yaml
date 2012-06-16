@@ -1,0 +1,111 @@
+context_param : 
+
+
+kk_third_lib : 
+    jdk : 
+        name : jdk1.6
+        path : 
+        order : 1
+        after_cmd :
+            cmd : [
+                './configure',
+                'make',
+                'make install'
+            ]
+    tomcat : 
+        name : tomcat
+        path : 
+        order : 30
+        after_cmd :
+            cmd : [
+                'python setup.py install'
+            ]
+    
+war_config : 
+    collect : 
+        server_path : /usr/local/tomcat_collect
+        file_config : 
+            mongo.properties : 
+                path : 
+                type : config
+                item : 
+                    #签约项目
+                    root_dict_forum : \u7b7e\u7ea6\u9879\u76ee
+                    info.collect.collection : infoCollect
+                    info.collect.search.out.collection : info_collect_out
+                    csp.info.incrementer.collection : infoIncrementer
+                    csp.info.infoIndex.collection : infoIndex
+
+                    collect.mongo.host : 127.0.0.1
+                    collect.mongo.port : 27017
+                    collect.mongo.dbname : collect
+
+                    csp.infos.mongo.host : 127.0.0.1
+                    csp.infos.mongo.port : 27017
+                    csp.infos.mongo.dbname : csp_infos
+
+            jdbc.properties : 
+                path : 
+                type : config
+                item : 
+                    jdbc.connection.infos.url : jdbc:oracle:thin:@10.1.130.47:1521:zxinfo
+                    jdbc.connection.infos.username : csp_infos
+                    jdbc.connection.infos.password : csp_infos
+                    jdbc.connection.infos.min_conn_count : 3
+                    jdbc.connection.infos.max_conn_count : 20
+                    jdbc.connection.infos.maximum_active_time : 7200000
+
+            inputtype.properties : 
+                path : 
+                type : config
+                item : 
+                    input.type.info.synchron : info_synchron
+
+    daq : 
+        server_path : /usr/local/tomcat_daq
+        file_config : 
+            file.properties : 
+                path : 
+                type : config
+                item : 
+                    tomcat.webapps.dir : /usr/local/tomcat-file/webapps
+                    annexfile.relativedir : /attachFiles/annex
+                    #行业新闻生成文件保存路径  已经无效
+                    #hexincs.path : /hxdata/hqserver/text/
+                    #swftool 配置
+                    swftoolsPath : /usr/local/tomcat3/webapps/swftools/bin/pdf2swf
+                    xpdfLanguageDir : /usr/local/tomcat3/webapps/swftools/share/xpdf/chinese-simplified
+                    #pdf 文件是否删除
+                    srcPdfDelete : true
+            jdbc.properties : 
+                path : 
+                type : config
+                item : 
+                    #hibernate 打印出sql 生产环境 需要设置为false
+                    hibernate.show_sql : true
+                    hibernate.format_sql : false
+                    
+                    #crm 库配置
+                    jdbc.connection.yhzx.url : jdbc:oracle:thin:@10.1.20.36:1521:ORCL
+                    jdbc.connection.yhzx.username : galaxy_crm
+                    jdbc.connection.yhzx.password : hexincrm#789
+                    #自选股库
+                    jdbc.connection.yhzxg.url : jdbc:oracle:thin:@10.1.10.121:1521:uuid
+                    jdbc.connection.yhzxg.username : galaxy_web
+                    jdbc.connection.yhzxg.password : stock_kind#789
+                    #港澳库
+                    jdbc.connection.yhzxga.url : jdbc:jtds:sqlserver://10.1.130.50/yhzx
+                    jdbc.connection.yhzxga.username : sa
+                    jdbc.connection.yhzxga.password : chinastock@123
+                    
+                    #资讯库
+                    jdbc.connection.infos.url : jdbc:oracle:thin:@10.1.130.47:1521:zxinfo
+                    jdbc.connection.infos.username : csp_infos
+                    jdbc.connection.infos.password : csp_infos
+                    jdbc.connection.users.url : jdbc:oracle:thin:@10.1.130.47:1521:zxinfo
+                    jdbc.connection.users.username : csp_users
+                    jdbc.connection.users.password : csp_users
+    
+    
+
+    

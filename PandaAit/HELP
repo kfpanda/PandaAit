@@ -1,0 +1,43 @@
+[PandaAit] 版本 1.0.0_beta
+
+描述：
+    PandaAit(Panda Application Installation Tool) 是一个应用流程化安装工具。它能够将一个应用的安装，给以流程化的形式描述出来，
+从而达到流程化安装应用的效果。只要第一次描述好流程，以后的安装将会变得非常简单。
+
+
+应用流程化安装工具使用帮助：
+
+执行命令： ./run.py --help
+
+Usage: run.py [-acs] [-i <xyz>] [-t <xyz>] [-w <xyz>] [-p appname]
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -p appname, --app=appname
+                        应用名，多个用空格分割。例如：--app
+                        appname
+  -a, --all             应用程序安装，配置及服务启动。
+  -i libname, --install=libname
+                        三方包安装。例如：--install libname1 libname2
+                        或 --install all  安装所有包。
+  -t svrname, --test=svrname
+                        应用服务测试。例如：--test svrname1 svrname2
+                        或  --test all 执行所有测试。
+  -c, --config          应用程序配置。
+  -w warname, --war=warname
+                        war应用程序部署。--war warname1 warname2  或
+                        --war all 安装所有war包
+  -d, --delete          在部署war时，是否先删除原来老的war拷贝
+                        先war到服务器目录下。
+  -s, --start           应用程序启动。
+
+
+实例：
+安装linux  ntp服务：
+使用命令：./run.py -a -p ntp
+安装 hexin 主站应用：
+使用命令：./run.py -a -p hexincs
+
+注意：
+1.在python不是2.7及以上版本时，需要先执行命令：./installpython.py 来更新python版本到2.7版本。

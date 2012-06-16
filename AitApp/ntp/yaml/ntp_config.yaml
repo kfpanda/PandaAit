@@ -1,0 +1,40 @@
+context_param : 
+    
+
+third_lib : 
+    ntp-server : 
+        name : ntp-4.2
+        path : 
+        order : 1
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/ntp --enable-all-clocks --enable-parse-clocks',
+                'make',
+                'make install'
+            ]
+
+file_config : 
+    ntp.conf : 
+        path : /etc/ntp.conf
+        order : 1
+        type : modify
+        item1 : 
+            type : replace
+            key : 'restrict default kod nomodify notrap nopeer noquery'
+            value : 'restrict default nomodify'
+            total : 1
+
+server_test : 
+    ntpd : 
+        - command : 
+            cmd : ps -ef | grep ntpd
+            success : 
+    
+server_config :
+    ntpd : 
+        before_cmd : 
+            cmd : 
+                - pkill -9 ntpd
+                - rm -f /tmp/ntpd.pid
+            sleep : 1
+        command : /usr/local/ntp/bin/ntpd -c /etc/ntp.conf -p /tmp/ntpd.pid

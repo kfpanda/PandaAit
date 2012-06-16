@@ -1,0 +1,31 @@
+context_param : 
+    
+
+third_lib : 
+    jdk : 
+        name : jdk-7u4-linux
+        path : 
+        order : 1
+        unzip_dir : /usr/local/java/
+        after_cmd :
+            cmd : [
+            ]
+
+
+file_config :
+    profile : 
+        path : /etc/profile
+        type : modify
+        order : 40
+        item : 
+            type : replace
+            value : "JAVA_HOME=/usr/local/java/jdk1.7.0_04 \nCLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib \nPATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH \nexport JAVA_HOME CLASSPATH PATH"
+            total : 1
+            pos : end
+    source_cmd :
+        type : command
+        order : 10
+        cmd : [
+            "source /etc/profile"
+        ]
+    
