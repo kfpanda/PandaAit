@@ -291,14 +291,14 @@ class FileConfig:
     
     def file_replace (self, file_item, search_path=None, recursive=False):
         curr_dir = os.getcwd();
-        if( not file_item.has_key("path") or not file_item.has_key("replace_path") ):
+        if( not file_item.has_key("path") or not file_item.has_key("desc_path") ):
             return None;
-        src_file_path = file_item.has_key("path");
+        src_file_path = file_item["path"];
         if( not os.path.isfile(src_file_path) and not os.path.isdir(src_file_path) and search_path ) :
             pattern = r"^[\w\W]*" + src_file_path + "[\w\W]*$";
             src_file_path = fileinstall.path_search_file(pattern, search_path, recursive, True);
         
-        replace_path = file_item.has_key("replace_path");
+        replace_path = file_item["desc_path"];
         #如果是文件删除
         if( os.path.isfile(replace_path) ):
             os.remove(replace_path);
@@ -321,7 +321,7 @@ class FileConfig:
         def_path = self.cxt_holder.get_value("config_file");
         for key in file_replace_list.keys() :
             file_item = file_config_list[key];
-            replace_path = file_item.has_key("replace_path") and file_item["replace_path"] or "";
+            replace_path = file_item.has_key("desc_path") and file_item["desc_path"] or "";
             if( os.path.isfile(replace_path) ) :
                 src_file_path = file_item.has_key("path") and file_item["path"] or None;
                 if( (not src_file_path) and file_item.has_key("name") ):

@@ -129,7 +129,16 @@ class FileZip:
         if(root_del):
             for f_info in zip_obj.infolist() :
                 fl_path = f_info.filename.replace(root_dir + "/", "");
-                zip_obj._extract_member( f_info, os.path.join(unzip_path, fl_path), None);
+                fl_path = os.path.join(unzip_path, fl_path);
+                if( f_info.compress_type > 0 ):
+                    dir_path = os.path.dirname(fl_path);
+                    if( not os.path.isdir(dir_path) ):
+                        os.makedirs(dir_path);
+                    try:
+                        ff = open(fl_path, 'a');
+                        ff.writelines(zip_obj.open(f_info.filename));
+                    finally:
+                        ff.close();
         else:
             zip_obj.extractall(unzip_path, zip_obj.namelist());
         result_path = root_del and unzip_path or (unzip_path + "/" + root_dir);
@@ -182,12 +191,18 @@ class FileInstall:
     def set_cxt_holder (self, cxt_holder):
         self.cxt_holder = cxt_holder;
 
-    def all_lib_install (self, lib_list, lib_name=None):
+    def all_lib_install (self, lib_list, lib_name_list=None):
         currDir = os.getcwd();
         key_list = order_asc(lib_list);
         count = 0;
         
-        lib_name_list = (isnotblank(lib_name) and lib_name.strip() != "all") and lib_name.strip().split(" ") or None;
+        if( lib_name_list ):
+            for libname in lib_name_list:
+                if( libname and libname == "all" ):
+                    #如果包含all的话将安装所有包
+                    lib_name_list = None;
+                    break;
+        #lib_name_list = (isnotblank(lib_name) and lib_name.strip() != "all") and lib_name.strip().split(" ") or None;
 
         for key in key_list:
             lname = key[0];
@@ -297,4 +312,4 @@ class FileInstall:
 
 if  __name__ == "__main__":
     fz = FileZip("/home/app/stemp/");
-    print( fz.zip_file(sys.argv[1],root_del=True) );
+    print( fz.zip_file(sys.argv[1],'d:/tttt', root_del=True) );
