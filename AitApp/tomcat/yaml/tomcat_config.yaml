@@ -1,0 +1,31 @@
+context_param : 
+    unzip_dir : /usr/local/tomcat
+    st_port : 8005
+    tomcat_port : 8080
+
+third_lib : 
+    tomcat : 
+        name : apache-tomcat
+        path : 
+        order : 1
+        unzip_dir : ${unzip_dir}/${root_del}
+        after_cmd :
+            cmd : [
+            ]
+
+
+file_config :
+    server.xml : 
+        path : ${unzip_dir}/conf/server.xml
+        order : 1
+        type : modify
+        item1 : 
+            type : replace
+            key : <Server port="8005" shutdown="SHUTDOWN">
+            value : <Server port="${st_port}" shutdown="SHUTDOWN">
+            total : 1
+        item2 : 
+            type : replace
+            key : <Connector port="8080" protocol="HTTP/1.1"
+            value : <Connector port="${tomcat_port}" protocol="HTTP/1.1"
+            total : 1

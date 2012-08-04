@@ -1,0 +1,152 @@
+context_param : 
+    
+
+third_lib : 
+    openssl : 
+        name : openssl-
+        path : 
+        order : 1
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/ssl',
+                'make',
+                'make install'
+            ]
+    apr : 
+        name : apr-1
+        path : 
+        order : 2
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/apr',
+                'make',
+                'make install'
+            ]
+    apr-util : 
+        name : apr-util-1
+        path : 
+        order : 3
+        after_cmd :
+            cmd : [
+                './configure --with-apr=/usr/local/apr',
+                'make',
+                'make install'
+            ]
+    pcre : 
+        name : pcre
+        path : 
+        order : 10
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/pcre',
+                'make',
+                'make install'
+            ]
+    httpd : 
+        name : httpd-
+        path : 
+        order : 20
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/apache --with-pcre=/usr/local/pcre --with-apr=/usr/local/apr/bin/apr-1-config --with-apr-util=/usr/local/apr/bin/apu-1-config --enable-dav --enable-so --enable-rewrite --enable-dav --enable-maintainer-mode --enable-ssl=static --with-ssl=/usr/local/ssl',
+                'make',
+                'make install'
+            ]
+    subversion : 
+        name : subversion
+        path : 
+        order : 30
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/subversion --with-apxs=/usr/local/apache/bin/apxs --with-apr=/usr/local/apr/bin/apr-1-config --with-apr-util=/usr/local/apr/bin/apu-1-config',
+                'make',
+                'make install',
+                '/usr/local/subversion/bin/svnadmin create /usr/local/svn_repo',
+                "/usr/sbin/groupadd www",
+                "/usr/sbin/useradd -g www www",
+                'chown -R www:www /usr/local/svn_repo/',
+                'chmod -R 700 /usr/local/svn_repo/',
+                '/usr/local/apache/bin/htpasswd -mb /usr/local/svn_repo/conf/passwd admin hexin'
+            ]
+
+file_config :
+    svn_authz : 
+        path : svn_authz
+        desc_path : /usr/local/svn_repo/svn_authz
+        type : replace
+        order : 1
+    svn_passwd : 
+        path : svn_passwd
+        desc_path : /usr/local/svn_repo/svn_passwd
+        type : replace
+        order : 10
+    mod_dav_svn.so : 
+        path : mod_dav_svn.so
+        desc_path : /usr/local/apache/modules/mod_dav_svn.so
+        type : replace
+        order : 20
+    mod_authz_svn.so : 
+        path : mod_authz_svn.so
+        desc_path : /usr/local/apache/modules/mod_authz_svn.so
+        type : replace
+        order : 30
+    svn_cmd :
+        type : command
+        order : 40
+        cmd : [
+            "chown www:www /usr/local/svn_repo/svn_authz",
+            "chown www:www /usr/local/svn_repo/svn_passwd"
+        ]
+    httpd.conf :
+        path : /usr/local/apache/conf/httpd.conf
+        type : modify
+        order : 50
+        item : 
+            type : replace
+            key : "User www"
+            value : "User www"
+            total : 1
+        item2 : 
+            type : replace
+            key : "Group www"
+            value : "Group www"
+            total : 1
+        item3 : 
+            type : replace
+            value : "\n<Location /svn/> \nDAV svn \nSVNPath /usr/local/svn_repo/ \nAuthType Basic \nAuthName \"BestSoftware\" \nAuthuserFile /usr/local/svn_repo/passwd \nAuthzSVNAccessFile /usr/local/svn_repo/authz \nRequire valid-user \n</Location>"
+            total : 1
+            pos : end
+        item4 : 
+            type : replace
+            key : "<IfModule unixd_module>"
+            value : "\nLoadModule dav_svn_module modules/mod_dav_svn.so \nLoadModule authz_svn_module modules/mod_authz_svn.so \n<IfModule unixd_module>"
+            total : 1
+#    authz :
+#        path : /usr/local/svn_repo/conf/authz
+#        type : modify
+#        order : 40
+#        item : 
+#            type : replace
+#            key : "[groups]"
+#            value : "[groups] \ng_admin = admin"
+#            total : 1
+#        item2 : 
+#            type : replace
+#            value : "\n[/] \n@g_admin = rw \n* = r"
+#            total : 1
+#            pos : end
+#    svnserve.conf : 
+#        path : /usr/local/svn_repo/conf/svnserve.conf
+#        type : modify
+#        order : 40
+#        item : 
+#            type : replace
+#            key : "[general]"
+#            value : "[general] \nanon-access = none \nauth-access = write"
+#            total : 1
+
+server_test : 
+    subversion : 
+        - command : 
+            cmd : /usr/local/subversion/bin/svnserve --version
+            success : 1.7.5

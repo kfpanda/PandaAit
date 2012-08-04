@@ -133,7 +133,7 @@ class FileConfig:
                 return True;
         return False;
 
-    def war_config (self, war_config_list, war_name=None, war_del=False):
+    def war_config (self, war_config_list, war_name_list=None, war_del=False):
         '''文件配置模块'''
         curr_dir = os.getcwd();
         if( not war_config_list ):
@@ -145,7 +145,13 @@ class FileConfig:
                 "java 版本（%s） 小于 1.6 ，请安装 1.6及以上的jdk版本。" %(java_version, java_version));
             return None;
         
-        war_name_list = (fileinstall.isnotblank(war_name) and war_name.strip() != "all") and war_name.strip().split(" ") or None;
+        if( war_name_list ):
+            for warname in war_name_list:
+                if( warname and warname == "all" ):
+                    #如果包含all的话将安装所有包
+                    war_name_list = None;
+                    break;
+        #war_name_list = (fileinstall.isnotblank(war_name) and war_name.strip() != "all") and war_name.strip().split(" ") or None;
         
         war_filter_list = {};
 
@@ -160,12 +166,15 @@ class FileConfig:
                     "警告：服务器路径（%s） 不存在。" %(server_path, server_path) );
                 continue;
             war_filter_list[war_key] = war_item;
+            server_webapps_path = server_path + "/webapps/";
             if( war_del ) : 
-                server_webapps_path = server_path + "/webapps/";
                 if( os.path.isfile(server_webapps_path + war_key + ".war") ):
                     os.remove(server_webapps_path + war_key + ".war");
                 if( os.path.isdir(server_webapps_path + war_key) ):
                     shutil.rmtree(server_webapps_path + war_key);
+            #如果目录不存在，则需要拷贝war包。
+            if( not os.path.isdir(server_webapps_path + war_key) ) :
+                war_del = True;
                 war_file = self.cxt_holder.get_value("config_file") + "/" + war_key + ".war";
                 if( os.path.isfile(war_file) ):
                     shutil.copy(war_file, server_webapps_path);

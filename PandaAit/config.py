@@ -35,7 +35,7 @@ def _init_defualt_param ():
     
     return default_config;
 
-def _init_param ():
+def _init_param (user_param_list=None):
     '''获取appname的配置文件中的配置项'''
     cfg = {};
     cfg["defualt_config"] = _init_defualt_param();
@@ -46,6 +46,17 @@ def _init_param ():
     yp = YamlParse(yaml_path);
     param_list = yp.get_items("context_param");
     cxt_holder.addparams(param_list);
+
+    '''设置用户命令行传入参数,用户参数将会覆盖掉yaml配置文件中设置的默认参数。
+    将命令行传入的参数，放入到上下文参数中。'''
+    if( user_param_list ):
+        pm_list = {};
+        for prm in user_param_list :
+            key_value = prm.split("=");
+            if( len(key_value) == 2 ):
+                pm_list[key_value[0]] = key_value[1];
+        cxt_holder.addparams(pm_list);
+
     app_config = {};
     for itm in config_item :
         app_config[itm] = yp.get_items(itm, cxt_param=cxt_holder.get_cxt_param());

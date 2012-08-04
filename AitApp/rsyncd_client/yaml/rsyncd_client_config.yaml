@@ -1,0 +1,30 @@
+context_param : 
+    
+
+third_lib : 
+    
+
+file_config :
+    client-rsyncd.scrt : 
+        path : ${config_file}/rsyncd/client-rsyncd.scrt
+        desc_path :/etc/rsyncd/client-rsyncd.scrt
+        type : replace
+        order : 1
+    client-rsyncd.scrt_sec : 
+        path : /etc/rsyncd/client-rsyncd.scrt
+        order : 10
+        type : modify
+        item1 : 
+            type : replace
+            key : password
+            value : "${password}"
+            total : 1
+    rsyncd_client_cmd :
+        type : command
+        order : 20
+        cmd : [
+            "chmod 600 /etc/rsyncd/client-rsyncd.scrt"
+        ]
+server_config : 
+    rsync_client : 
+        command : rsync -vzrtopg --progress root@${server_ip}::hyxw /hxdata/hqserver/text/rss/hyxw --password-file=/etc/rsyncd/client-rsyncd.scrt

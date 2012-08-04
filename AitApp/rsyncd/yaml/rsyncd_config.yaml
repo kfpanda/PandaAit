@@ -1,0 +1,44 @@
+context_param : 
+    
+
+third_lib : 
+    
+
+file_config :
+    rsyncd.conf : 
+        path : ${config_file}/rsyncd/rsyncd.conf
+        desc_path : /etc/rsyncd/rsyncd.conf
+        type : replace
+        order : 1
+    rsyncd.scrt : 
+        path : ${config_file}/rsyncd/rsyncd.scrt
+        desc_path : /etc/rsyncd/rsyncd.scrt
+        type : replace
+        order : 10
+    rsync : 
+        path : ${config_file}/rsyncd/rsync
+        desc_path :/etc/xinetd.d/rsync
+        type : replace
+        order : 20
+    rsyncd.scrt_2 : 
+        path : /etc/rsyncd/rsyncd.scrt
+        order : 30
+        type : modify
+        item1 : 
+            type : replace
+            key : root:password
+            value : "root:${password}"
+            total : 1
+    rsyncd_cmd :
+        type : command
+        order : 40
+        cmd : [
+            "chmod 600 /etc/rsyncd/rsyncd.scrt"
+        ]
+server_config : 
+    rsync_server : 
+        before_cmd : 
+            cmd : 
+                - chkconfig rsync on
+            sleep : 1
+        command : service xinetd restart

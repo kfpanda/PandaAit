@@ -72,6 +72,7 @@ def init_config (appname=None):
     config.root_path = root_path;
     config.config_item = config_item;
     config.put_cxt_param(context_param);
+        
 
 def main():
     reload(sys);
@@ -79,10 +80,11 @@ def main():
     p = optparse.OptionParser(description="PandaAit Version 1.0.0_beta ( 2012 May 11, compiled May 20 2012 09:09:09 )", usage="%prog [-acs] [-i <xyz>] [-t <xyz>] [-w <xyz>] [-p appname]", version="PandaAit 1.0.0_beta");
     p.add_option('--app', '-p', default=None, action="store", metavar="appname", help='应用名，多个用空格分割。例如：--app appname');
     p.add_option('--all', '-a', default=False, action="store_true", help='应用程序安装，配置及服务启动。');
-    p.add_option('--install', '-i', default=None, action="store", dest="install", metavar="libname", help='三方包安装。例如：--install libname1 libname2 或 --install all  安装所有包。');
+    p.add_option('--install', '-i', default=None, action="append", dest="install", metavar="libname", help='三方包安装。例如：--install libname1 --install libname2 或 --install all  安装所有包。');
     p.add_option('--test', '-t', default=None, action="store", metavar="svrname", help='应用服务测试。例如：--test svrname1 svrname2 或  --test all 执行所有测试。');
     p.add_option('--config', '-c', default=False, action="store_true", help='应用程序配置。');
-    p.add_option('--war', '-w', default=None, action="store", metavar="warname", help='war应用程序部署。--war warname1 warname2  或  --war all 安装所有war包');
+    p.add_option('--war', '-w', default=None, action="append", dest="war", metavar="warname", help='war应用程序部署。--war warname1 --war warname2  或  --war all 安装所有war包');
+    p.add_option('--param', '-m', default=None, action="append", dest="param", metavar="param", help='上下文参数设置，--param param1=value1 --param param2=value2');
     p.add_option('--delete', '-d', default=False, action="store_true", help='在部署war时，是否先删除原来老的war拷贝先war到服务器目录下。');
     p.add_option('--start', '-s', default=False, action="store_true", help='应用程序启动。');
 
@@ -95,7 +97,7 @@ def main():
     
     init_config(options.app);
     
-    cfg = config._init_param();
+    cfg = config._init_param(options.param);
     app_config(options, cfg, options.app);
         
 if  __name__ == "__main__":
