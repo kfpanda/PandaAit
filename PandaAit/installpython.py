@@ -56,7 +56,8 @@ def help ():
     reload(sys);
     sys.setdefaultencoding('utf8');
     p = optparse.OptionParser(usage="%prog [-i]", version="PandaAit 1.0.0_beta");
-    p.add_option('--install', '-i', default=None, action="store_true", metavar="", help='python 2.7.3版本及pyyaml组件安装。');
+    p.add_option('--all', '-a', default=None, action="store_true", metavar="", help='python 2.7.2版本及pyyaml组件安装。');
+    p.add_option('--yaml', '-y', default=None, action="store_true", metavar="", help='安装python 2.7.2版本的pyyaml组件。');
     
     options, arguments = p.parse_args();
 
@@ -65,8 +66,12 @@ def help ():
 def main ():
     options = help();
     init();
-    if( options.install ):
-        f_install.set_appname("python");
+    f_install.set_appname("python");
+    if( options.all ):
+        f_install.all_lib_install(third_lib);
+    if( options.yaml ):
+        #删除python安装项
+        third_lib.pop("python");
         f_install.all_lib_install(third_lib);
 
 if  __name__ == "__main__":
