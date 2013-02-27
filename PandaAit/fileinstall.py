@@ -294,8 +294,13 @@ class FileInstall:
         if( not server_config ):
             return None;
         
-        for svr_item in server_config :
-            svr = server_config[svr_item];
+        #example server_config={'nginx': {'command': '**', 'order': 20}, 'tracker': {'command': '**', 'order': 1}, 'storage': {'command': '**', 'order': 10}}
+        #example server_item=[('tracker', 1), ('storage', 10), ('nginx', 20)]
+        server_item = order_asc(server_config);
+        
+        for svr_item in server_item :
+            svr_name = svr_item[0];
+            svr = server_config[svr_name];
             
             if( svr.has_key("before_cmd") ):
                 cmd_exec(svr["before_cmd"]);
@@ -306,7 +311,7 @@ class FileInstall:
             if( svr.has_key("after_cmd") ):
                 cmd_exec(svr["after_cmd"]);
             
-            print(svr_item + " restart success.");
+            print("----------" + svr_name + " restart success." + "----------");
             
         return None;
 

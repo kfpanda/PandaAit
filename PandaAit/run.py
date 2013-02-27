@@ -90,10 +90,12 @@ def main():
 
     options, arguments = p.parse_args();
     
-    #清空临时目录
-    if( os.path.isdir(root_path + "/stemp_file") ):
+    #如果重新安装时（带有安装命令），清空临时目录
+    if( not options.all and options.install and os.path.isdir(root_path + "/stemp_file") ):
         shutil.rmtree(root_path + "/stemp_file");
-    os.mkdir(root_path + "/stemp_file/");
+    #stemp_file 目录不存在创建目录
+    if( not os.path.isdir(root_path + "/stemp_file") ) :
+        os.mkdir(root_path + "/stemp_file/");
     
     init_config(options.app);
     

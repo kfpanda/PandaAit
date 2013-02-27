@@ -7,6 +7,17 @@ import fileinstall
 from switch import switch
 #from file_oper import FileOper
 
+class TipInfo:
+    def __init__ (self):
+        self;
+    
+    def tip_info (self, info):
+        print("-----------------------------------");
+        print(info);
+        print("-----------------------------------");
+
+Info = TipInfo(); 
+
 class ContextHolder:
     cxt_param = {};
     def __init__ (self, cxt_param=None):
@@ -47,7 +58,7 @@ class FileConfig:
     def set_cxt_holder (self, cxt_holder):
         if(cxt_holder) :
             self.cxt_holder = cxt_holder;
-    
+        
     def file_sample_replace(self, file_path, item_param):
         fname = os.path.split(file_path);
         contentList = [];
@@ -91,37 +102,34 @@ class FileConfig:
         nf.close();
                 
     #文件内容替换方法, fileParam total 表示替换的总数, 默认值使用要小心。修改默认值后，下次函数调用将继续保留上次修改的值。
-    def file_content_replace(self, file_path, file_item, total=None):
+    def file_content_replace(self, file_path, file_item, total=0):
         #fileParam = [ {'key' : 'test', 'value' : 'values', 'total' : '1' } , {'key' : 'test2', 'value' : 'values2', 'total' : '10' } ]
         contentList = [];
-        print('file %s replace beginning' %(file_path));
-        print("");
         if( file_item.has_key("pos") and file_item["pos"] == "end" ) :
             self.file_write(file_path, file_item["value"], True);
         else:
             f = open(file_path, 'rU');
+            #计算要替换的总数。
+            ttl = file_item.has_key("total") and file_item["total"] or total;
+            ct = file_item.has_key("count") and file_item["count"] or 0;
             for line in f.readlines() :
                 '''过滤掉注释， 以#开头行为注释，去掉空行。'''
                 if(line.startswith(";") or line.startswith("#")  or line.strip() == ''):
                     contentList.append(line);
                     continue;
-
-                if( line.find(file_item["key"], 0) > -1 ) : 
-                    ttl = file_item.has_key("total") and file_item["total"] or total;
-                    ct = file_item.has_key("count") and file_item["count"] or 0;
-                    if( (not ttl) or ( ttl and ct < ttl ) ) :
-                        line = line.replace(file_item["key"], file_item["value"]);
-                        file_item["count"] = ct + 1;
-                    else:
-                        file_item.remove(file_item);                  
-
+                
+                if( ct < ttl and line.find(file_item["key"], 0) > -1 ) : 
+                    print("old-->" + line);
+                    line = line.replace(file_item["key"], file_item["value"]);
+                    ct = ct + 1;
+                    print("new-->" + line);
+                
                 contentList.append(line);
-
+                
             f.flush();
             f.close();
             self.file_write(file_path, contentList);
-        print('file %s replace end' %(file_path));
-        print("");
+
     
     def is_server_run (self, svr_name, svr_list):
         if( not svr_name ):
@@ -196,9 +204,9 @@ class FileConfig:
             server_path = war_item["server_path"];
             file_config_list = war_item.has_key("file_config") and war_item["file_config"] or {};
             key_list = fileinstall.order_asc(file_config_list);
-            print("-----------------------------------");
-            print('%s config start' %(war_key));
-            print("-----------------------------------");
+
+            Info.tip_info( '%s config start' %(war_key) );
+
             for key in key_list:
                 #获取配置文件名
                 fc_name = key[0];
@@ -229,9 +237,9 @@ class FileConfig:
                     if case(): 
                         None;
                 count = count + 1;
-            print("-----------------------------------");
-            print('%s config end' %(war_key));
-            print("-----------------------------------");
+            
+            Info.tip_info( '%s config end' %(war_key) );
+
         os.chdir(curr_dir);
 
         #重启tomcat;
@@ -280,12 +288,17 @@ class FileConfig:
     
     def file_modify (self, file_item):
         '''文件修改'''
+        Info.tip_info( 'file %s modify beginning' %(file_item["path"]) );
+        
         for item_key in file_item :
             key_value = len(item_key.strip()) > 4 and item_key.strip()[0:4] or item_key.strip();
             if( key_value == "item" ):
                 #获取以item开头的字典，配置项。
                 cf_item = file_item[item_key];
                 self.item_config(file_item["path"], cf_item);
+        
+        Info.tip_info( 'file %s modify end' %(file_item["path"]) );
+        
         return None;
     
     def item_config (self, file_path, file_item):

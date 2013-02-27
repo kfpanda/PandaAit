@@ -92,11 +92,12 @@ yaml配置规范：
                         'ln -s /usr/lib/libevent-1.4.so.2 /usr/local/libevent/lib/libevent-1.4.so.2'
                     ]
 3.文件配置选项：
-    file_config : 
+file_config : 
     php.ini : 
         path : /usr/local/php/etc/php.ini
         order : 1
-        type : modify, replace, copy, command
+        #type = modify, replace, copy, command
+        type : modify
         item1 : 
             type : replace
             key : extension_dir = "./"
@@ -107,6 +108,24 @@ yaml配置规范：
             key : magic_quotes_gpc = On
             value : magic_quotes_gpc = Off
             total : 1
+        item3 : 
+            type : replace
+            #在文件结尾加 一行 value
+            pos : end
+            value : magic_quotes_gpc = Off
+    nginx.conf : 
+        # path 路径 如果不是全路径，则将会从config_file 路径下查找。
+        path : nginx.conf
+        desc_path : /usr/local/nginx/conf/nginx.conf
+        type : replace
+        order : 1
+    fastdfs_cmmd : 
+        type : command
+        order : 10
+        cmd : [
+            "mkdir /home/fastdfs",
+            ""
+        ]
 
 4.服务测试选项：
     server_test : 
@@ -121,6 +140,7 @@ yaml配置规范：
 5.服务启动选项：
     server_config :                                     #服务器启动配置项
         memcached :                                     #需要启动的服务。
+            order : 1                                   #启动顺序
             before_cmd :                                #在command命令之前执行的批量命令。对应的有after_cmd。
                 cmd :                                   #批量shell命令配置。
                     - pkill -9 memcached
