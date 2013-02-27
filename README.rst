@@ -53,6 +53,34 @@ Requirements：
 
 
 
+PandaAit 快速开始
+
+首先需要 安装python 2.7 和 pyyaml 支持。
+可以执行：
+./installpython.py -i
+
+执行完后，程序将会自动更改python版本到2.7。
+
+然后下载需要安装的应用包。
+例如：AitApp 中的 java应用。
+将应用放入到PandaAit指定目录中。
+或者执行命令：
+./install.py -p ${PandaAit Path}
+
+程序会自动将应用中的文件放入到PandaAit目录相对应的目录。
+例如：java/third_lib  下的三方包  放入到 PandaAit/third_lib 目录下
+java/yaml 下的配置文件  放入到 PandaAit/yaml 目录下
+java/config_file 下的配置文件 放入到 PandaAit/config_file 目录下
+
+注意：
+应用配置文件和引用的三方包，也可以手工添加。可参照手工添加应用配置文件说明。
+
+最后 可以执行命令：
+./run.py -a -p java
+
+来安装相应的应用。
+
+
 应用流程化安装工具使用帮助：
 
 执行命令： ./run.py --help
@@ -81,19 +109,24 @@ Options:
   -s, --start           应用程序启动。
 
 
-实例：
-安装linux  ntp服务：
-使用命令：./run.py -a -p ntp
-安装 hexin 主站应用：
-使用命令：./run.py -a -p hexincs
 
-注意：
-1.在python不是2.7及以上版本时，需要先执行命令：./installpython.py 来更新python版本到2.7版本。
+手工添加 配置文件说明：
+目录规范：
+    yaml目录 存放yaml配置文件目录。
+    名称规则：应用名 + "_config.yaml"。
 
+    third_lib目录 存放应用安装有关的包。
+    添加时需要 建一个 以 ${app_name} 为名称的目录。 在该目录下放所有需要应用到的包。
+    注意：
+        目前应用压缩包格式只支持：zip, tgz, tar, gz。 不支持rar格式的压缩包。
 
-yaml配置文件规则：
+    config_file目录 存放应用安装 所需要的配置文件。
+        添加时需要 建一个 以 ${app_name} 为名称的目录。 在该目录下放所有需要应用到的配置文件。
+
+yaml配置规范：
 
 一个yaml配置文件分为5个模块（随着功能的完善模块将会相应增加），分别为：
+
 1.全局参数定义选项：
     字典格式：
         context_param :                             #如果定义全局参数，则在上下文中可以是用${ttserver_ip}来引用参数。
@@ -114,11 +147,12 @@ yaml配置文件规则：
                         'ln -s /usr/lib/libevent-1.4.so.2 /usr/local/libevent/lib/libevent-1.4.so.2'
                     ]
 3.文件配置选项：
-    file_config : 
+file_config : 
     php.ini : 
         path : /usr/local/php/etc/php.ini
         order : 1
-        type : modify, replace, copy, command
+        #type = modify, replace, copy, command
+        type : modify
         item1 : 
             type : replace
             key : extension_dir = "./"
@@ -129,6 +163,24 @@ yaml配置文件规则：
             key : magic_quotes_gpc = On
             value : magic_quotes_gpc = Off
             total : 1
+        item3 : 
+            type : replace
+            #在文件结尾加 一行 value
+            pos : end
+            value : magic_quotes_gpc = Off
+    nginx.conf : 
+        # path 路径 如果不是全路径，则将会从config_file 路径下查找。
+        path : nginx.conf
+        desc_path : /usr/local/nginx/conf/nginx.conf
+        type : replace
+        order : 1
+    fastdfs_cmmd : 
+        type : command
+        order : 10
+        cmd : [
+            "mkdir /home/fastdfs",
+            ""
+        ]
 
 4.服务测试选项：
     server_test : 
@@ -143,6 +195,7 @@ yaml配置文件规则：
 5.服务启动选项：
     server_config :                                     #服务器启动配置项
         memcached :                                     #需要启动的服务。
+            order : 1                                   #启动顺序
             before_cmd :                                #在command命令之前执行的批量命令。对应的有after_cmd。
                 cmd :                                   #批量shell命令配置。
                     - pkill -9 memcached
@@ -152,8 +205,8 @@ yaml配置文件规则：
 
 6.java web应用程序部署：
     war_config : 
-        daq : 
-        server_path : /usr/local/tomcat_daq
+        my_app : 
+        server_path : /usr/local/tomcat
         file_config : 
             file.properties : 
                 path :                                  #指定file.properties文件路径，如果不指定，程序将查找server_path目录下该配置文件。
@@ -162,11 +215,6 @@ yaml配置文件规则：
                 item :                                  #需要修改的文件配置项。
                     tomcat.webapps.dir : /usr/local/tomcat-file/webapps
                     annexfile.relativedir : /attachFiles/annex
-                    #行业新闻生成文件保存路径  已经无效
-                    #hexincs.path : /hxdata/hqserver/text/
-                    #swftool 配置
-                    swftoolsPath : /usr/local/tomcat3/webapps/swftools/bin/pdf2swf
-                    xpdfLanguageDir : /usr/local/tomcat3/webapps/swftools/share/xpdf/chinese-simplified
                     #pdf 文件是否删除
                     srcPdfDelete : true
             jdbc.properties : 
@@ -176,34 +224,9 @@ yaml配置文件规则：
                     #hibernate 打印出sql 生产环境 需要设置为false
                     hibernate.show_sql : true
                     hibernate.format_sql : false
-                    
-                    #资讯库
-                    jdbc.connection.infos.url : jdbc:oracle:thin:@10.1.130.47:1521:zxinfo
-                    jdbc.connection.infos.username : csp_infos
-                    jdbc.connection.infos.password : csp_infos
-                    jdbc.connection.users.url : jdbc:oracle:thin:@10.1.130.47:1521:zxinfo
-                    jdbc.connection.users.username : csp_users
-                    jdbc.connection.users.password : csp_users
+                    #数据库
+                    jdbc.connection.infos.url : jdbc:oracle:thin:@{ip:port}:sid
+                    jdbc.connection.infos.username : {name}
+                    jdbc.connection.infos.password : {password}
 
 
-数据采集程序：
-
-脚本安装的三方包有：
-1.python 2.7.2
-2.dbwgc-libatomic
-3.pymongo-2.11
-4.web.py-0.36
-5.uwsgi-1.0.4
-6.mongodb-2.1
-7.nginx-1.1.16
-    nginx引入的组件有：nginx-gridfs-v0.8-11 和 pcre-8.30.
-
-所以需要将上述版本的包加入到 thirdlib目录下（脚本发布默认已经存在）。
-
-数据采集程序部署，只需要运行./config.py  --install 。
-如果脚本运行没有权限，请先执行chmod -R uog+x ./*。
-
-程序部署，默认设置：
-默认mongodb 服务开启, 默认端口为 127.0.0.1:27017。
-默认开启uwsgi 服务端口为 127.0.0.1:3031。
-默认开启nginx 服务端口为 127.0.0.1:80 。
