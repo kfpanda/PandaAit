@@ -1,0 +1,206 @@
+context_param : 
+    tracker_ip : "10.0.2.15:22122"
+    nginx_port : 18080
+
+third_lib : 
+    APR : 
+        name : apr-1.
+        path : 
+        order : 1
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/apr',
+                'make',
+                'make install'
+            ]
+    APR-util : 
+        name : apr-util-1.
+        path : 
+        order : 10
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr',
+                'make',
+                'make install'
+            ]
+    pcre : 
+        name : pcre-
+        path : 
+        unzip_dir : ${stemp_file}/pcre/${root_del}
+        order : 20
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/pcre',
+                'make',
+                'make install'
+            ]
+    httpd : 
+        name : httpd-2
+        path : 
+        order : 30
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/apache2 --with-pcre=/usr/local/pcre/bin/pcre-config --with-included-apr --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util --enable-so --enable-dav --enable-mainer-mode --enable-rewrite',
+                'make',
+                'make install'
+            ]
+    php : 
+        name : php-5.
+        path : 
+        order : 40
+        after_cmd :
+            cmd : [
+                './configure --prefix=/usr/local/php5 --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php5/etc/ --with-zlib --with-curl=shared --with-openssl=shared --with-gd --with-jpeg-dir --with-png-dir --with-zlib-dir --with-ttf --with-freetype-dir --enable-pdo --enable-gd-native-ttf --enable-sockets=shared --enable-xml=shared --with-xsl=shared --enable-soap=shared --enable-zip=shared --enable-mbstring --enable-pcntl --with-bz2  --enable-ftp --enable-calendar',
+                'make ',
+                'make install',
+                'rm -f /usr/local/php/etc/php.ini',
+                'cp php.ini-production /usr/local/php/etc/php.ini'
+            ]
+# 支持nginx fastcgi 和 apache. --with-MySQL 加该项支持MySql --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd  
+#'./configure --prefix=/usr/local/php5 --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php5/etc/ --enable-xml --enable-fastcgi --enable-fpm --enable-mbstring --enable-sockets --enable-track-vars --enable-inline-optimization --with-xml --with-curl',
+#'./configure --prefix=/usr/local/php5 --with-apxs2=/usr/local/apache2/bin/apxs --with-config-file-path=/usr/local/php5/etc/ --enable-track-vars --with-xml --with-curl',
+
+file_config :
+    fastdfs_cmmd : 
+        type : command
+        order : 10
+        cmd : [
+            "mkdir -p /home/fastdfs",
+            "mkdir -p /usr/local/fastdfs"
+        ]
+    mod_fastdfs.conf : 
+        path : /etc/fdfs/mod_fastdfs.conf
+        order : 1
+        type : modify
+        item1 : 
+            type : replace
+            key : base_path=/tmp
+            value : base_path=/home/fastdfs/log
+            total : 1
+        item2 : 
+            type : replace
+            key : tracker_server=tracker:22122
+            value : tracker_server=${tracker_ip}
+            total : 1
+        item3 : 
+            type : replace
+            key : storage_server_port=23000
+            value : storage_server_port=23000
+            total : 1
+        item4 : 
+            type : replace
+            key : store_path_count=1
+            value : store_path_count=2
+            total : 1
+        #作为备份目录
+        item5 : 
+            type : replace
+            key : store_path0=/home/yuqing/fastdfs
+            value : "store_path0=/home/fastdfs \nstore_path1=/usr/local/fastdfs"
+            total : 1
+        item6 : 
+            type : replace
+            key : group_count = 0
+            value : "group_count = 1\n\n[group1]\ngroup_name=group1\nstore_path_count=2\nstore_path0=/home/fastdfs\nstore_path1=/usr/local/fastdfs"
+            total : 1
+        item7 : 
+            type : replace
+            key : url_have_group_name = false
+            value : url_have_group_name = true
+            total : 1
+    tracker.conf : 
+        path : /etc/fdfs/tracker.conf
+        order : 1
+        type : modify
+        item1 : 
+            type : replace
+            key : base_path=/home/yuqing/fastdfs
+            value : base_path=/home/fastdfs
+            total : 1
+        item3 : 
+            type : replace
+            key : reserved_storage_space = 10%
+            #存储空间设置
+            value : reserved_storage_space = 20%
+            total : 1
+        # 关闭内置的web server
+        item4 : 
+            type : replace
+            key : disabled=false
+            value : disabled=false
+            total : 3
+    storage.conf :
+        path : /etc/fdfs/storage.conf
+        order : 1
+        type : modify
+        item1 : 
+            type : replace
+            key : base_path=/home/yuqing/fastdfs
+            value : base_path=/home/fastdfs
+            total : 1
+        item2 : 
+            type : replace
+            key : tracker_server=192.168.209.121:22122
+            value : tracker_server=${tracker_ip}
+            total : 1
+        item3 : 
+            type : replace
+            key : group_name=group1
+            value : group_name=group1
+            total : 1
+        item4 : 
+            type : replace
+            key : store_path_count=1
+            value : store_path_count=2
+            total : 1
+        item5 : 
+            type : replace
+            key : store_path0=/home/yuqing/fastdfs
+            value : "store_path0=/home/fastdfs \nstore_path1=/usr/local/fastdfs"
+            total : 1
+        item6 : 
+            type : replace
+            key : use_connection_pool = false
+            value : use_connection_pool = true
+            total : 1
+        #存储服务端口
+        item7 : 
+            type : replace
+            key : port=23000
+            value : port=23000
+            total : 1
+    nginx.conf : 
+        path : nginx.conf
+        desc_path : /usr/local/fdfs_nginx/conf/nginx.conf
+        type : replace
+        order : 1
+    client.conf :
+        path : /etc/fdfs/client.conf
+        order : 1
+        type : modify
+        item1 : 
+            type : replace
+            key : base_path=/home/yuqing/fastdfs
+            value : base_path=/home/fastdfs
+            total : 1
+        item2 : 
+            type : replace
+            key : tracker_server=192.168.0.197:22122
+            value : tracker_server=${tracker_ip}
+            total : 1
+        item3 : 
+            type : replace
+            key : http.tracker_server_port=8080
+            value : http.tracker_server_port=18080
+            total : 1
+    
+server_config :
+    tracker : 
+        order : 1
+        command : restart.sh  fdfs_trackerd /etc/fdfs/tracker.conf
+    storage : 
+        order : 10
+        command : restart.sh  fdfs_storaged /etc/fdfs/storage.conf
+    nginx : 
+        order : 20
+        command : restart.sh /usr/local/fdfs_nginx/sbin/nginx

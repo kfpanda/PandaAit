@@ -1,0 +1,23 @@
+<html>
+<head>
+<title>webservice 接口测试</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+<script language="javascript" type="text/javascript">
+</script>
+
+</head>
+<body>
+<form action="upload" method="post" enctype="multipart/form-data">
+	<input type="file" name="file" /><br/>
+	<input type="text" name="RANGE" value="1234" />
+	<br/>
+	<input type="submit" value="提交" />
+</form>
+
+<input type="button" value="执行"  onclick="ajaxRequest()" />
+
+<div id="result">
+</div>
+</body>
+</html>
